@@ -12,6 +12,7 @@ def create_app():
 
     app.config.from_mapping(
         MONGO_URI=getenv("MONGO_URI"),
+        MONGO_DB_NAME=getenv("MONGO_DB_NAME"),
         MONGO_SERVER_SELECTION_TIMEOUT_MS=int(getenv("MONGO_SERVER_SELECTION_TIMEOUT_MS", "5000")),
     )
 
