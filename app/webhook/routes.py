@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request, current_app
-from app.webhook.services import build_push_event
+from app.webhook.services import build_push_event, build_pull_request_event
 
 webhook = Blueprint('Webhook', __name__, url_prefix='/webhook')
 
@@ -13,7 +13,11 @@ def receiver():
 
     if event == "push":
         data = build_push_event(payload=payload)
-
         current_app.events_collection.insert_one(data)
+    elif event == "pull_request":
+        data = build_pull_request_event(payload=payload)
+        if data:
+            current_app.events_collection.insert_one(data)
+        print(payload)
         
     return jsonify({"status": "ok"}), 200

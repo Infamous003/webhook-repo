@@ -21,9 +21,32 @@ def build_push_event(payload: dict) -> dict:
         "timestamp": utc_timestamp,
     }
 
+def build_pull_request_event(payload: dict) -> dict:
+    action = payload["action"]
+    if action != "opened":
+        return None
+    
+    pr = payload["pull_request"]
+
+    return {
+        "request_id": str(pr.get("id")),
+        "author": pr.get("user", {}).get("login"),
+        "action": Action.PULL_REQUEST.value,
+        "from_branch": pr.get("head", {}).get("ref"),
+        "to_branch": pr.get("base", {}).get("ref"),
+        "timestamp": normalize_timestamp(pr.get("created_at")),
+    }
+
 def normalize_timestamp(raw_timestamp: str) -> str:
-    return (
-        datetime.fromisoformat(raw_timestamp)
-        .astimezone(timezone.utc)
-        .isoformat()
-    )
+    if not raw_timestamp:
+        return None
+    
+    if raw_timestamp.endswith("Z"):
+        raw_timestamp = raw_timestamp.replace("Z", "+00:00")
+    
+    dt = datetime.fromisoformat(raw_timestamp)
+
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    
+    return dt.astimezone(timezone.utc).isoformat()
