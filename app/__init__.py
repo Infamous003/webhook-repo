@@ -1,12 +1,21 @@
 from flask import Flask
-
 from app.webhook.routes import webhook
-
+from os import getenv
+from app.extensions import init_mongo
 
 # Creating our flask app
 def create_app():
 
     app = Flask(__name__)
+
+    app.logger.setLevel(getenv("LOG_LEVEL", "INFO"))
+
+    app.config.from_mapping(
+        MONGO_URI=getenv("MONGO_URI"),
+        MONGO_SERVER_SELECTION_TIMEOUT_MS=int(getenv("MONGO_SERVER_SELECTION_TIMEOUT_MS", "5000")),
+    )
+
+    init_mongo(app)
     
     # registering all the blueprints
     app.register_blueprint(webhook)
