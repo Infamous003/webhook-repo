@@ -1,6 +1,7 @@
 from flask import Flask
 from app.webhook.routes import webhook
 from app.api.routes import api_bp
+from app.frontend.routes import frontend_bp
 from os import getenv
 from app.extensions import init_mongo
 
@@ -22,5 +23,6 @@ def create_app():
     # registering all the blueprints
     app.register_blueprint(webhook)
     app.register_blueprint(api_bp)
+    app.register_blueprint(frontend_bp)
     
     return app
