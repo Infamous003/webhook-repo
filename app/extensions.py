@@ -4,7 +4,7 @@ from pymongo.errors import ConnectionFailure
 def init_mongo(app):
     mongo_uri = app.config.get("MONGO_URI")
     db_name = app.config.get("MONGO_DB_NAME")
-    mongo_timeout_ms = app.config.get("MONGO_SERVER_SELECTION_mongo_", 10000)
+    mongo_timeout_ms = app.config.get("MONGO_SERVER_SELECTION_TIMEOUT_MS", 10000)
 
     if not mongo_uri:
         raise ValueError("MONGO_URI is not set in the app configuration")
@@ -19,6 +19,9 @@ def init_mongo(app):
         app.mongo_client = client
         app.mongo_db = client[db_name]
         app.events_collection = app.mongo_db["events"]
+
+        # index on timestamp because we query by timstamp a lot
+        app.events_collection.create_index("timestamp")
 
         app.logger.info("Successfully connected to MongoDB")
     except ConnectionFailure as e:
