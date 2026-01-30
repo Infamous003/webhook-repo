@@ -29,11 +29,13 @@ async function fetchEvents() {
 }
 
 function appendEvents(events) {
-  events.forEach(event => {
-    if (renderedEvents.has(event.request_id)) {
+  // events are newest -> oldest, so we need to loop from behind
+  events.slice().reverse().forEach(event => {
+    const eventKey = `${event.action}-${event.request_id}-${event.timestamp}`;
+    if (renderedEvents.has(eventKey)) {
       return;
     }
-    renderedEvents.add(event.request_id);
+    renderedEvents.add(eventKey);
 
     const li = document.createElement("li");
     li.innerHTML = formatEvent(event);
@@ -63,6 +65,15 @@ function formatEvent(event) {
     `;
   }
 
+  if (event.action === "MERGE") {
+    return `
+      <span class="user">${event.author}</span>
+      <span class="action merge">merged</span>
+      branch <span class="branch">${event.from_branch}</span>
+      to <span class="branch">${event.to_branch}</span>
+      <span class="time">on ${time}</span>
+    `;
+  }
   return "Unknown event";
 }
 

@@ -23,19 +23,33 @@ def build_push_event(payload: dict) -> dict:
 
 def build_pull_request_event(payload: dict) -> dict:
     action = payload["action"]
-    if action != "opened":
-        return None
-    
     pr = payload["pull_request"]
 
-    return {
-        "request_id": str(pr.get("id")),
-        "author": pr.get("user", {}).get("login"),
-        "action": Action.PULL_REQUEST.value,
-        "from_branch": pr.get("head", {}).get("ref"),
-        "to_branch": pr.get("base", {}).get("ref"),
-        "timestamp": normalize_timestamp(pr.get("created_at")),
-    }
+    if not pr:
+        return None
+    
+    # When PR is OPENED
+    if action == "opened":
+        return {
+            "request_id": str(pr.get("id")),
+            "author": pr.get("user", {}).get("login"),
+            "action": Action.PULL_REQUEST.value,
+            "from_branch": pr.get("head", {}).get("ref"),
+            "to_branch": pr.get("base", {}).get("ref"),
+            "timestamp": normalize_timestamp(pr.get("created_at")),
+        }
+    
+    # When PR is MERGED
+    if action == "closed" and pr.get("merged") is True:
+        return {
+            "request_id": str(pr.get("id")),
+            "author": pr.get("merged_by", {}).get("login"),
+            "action": Action.MERGE.value,
+            "from_branch": pr.get("head", {}).get("ref"),
+            "to_branch": pr.get("base", {}).get("ref"),
+            "timestamp": normalize_timestamp(pr.get("merged_at")),
+        }
+    return None
 
 def normalize_timestamp(raw_timestamp: str) -> str:
     """

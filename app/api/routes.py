@@ -13,7 +13,7 @@ def get_events():
     events = list(
         current_app.events_collection
         .find(query, {"_id": 0})
-        .sort("timestamp", 1)
+        .sort("timestamp", -1) # newest to oldes
         .limit(20)
     )
 
