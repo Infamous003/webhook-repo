@@ -20,6 +20,6 @@ def receiver():
         if data:
             current_app.events_collection.insert_one(data)
     else:
-        return jsonify({"status": "ignored"})
+        return jsonify({"status": "ignored"}), 200
         
     return jsonify({"status": "ok"}), 200

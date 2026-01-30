@@ -38,6 +38,9 @@ def build_pull_request_event(payload: dict) -> dict:
     }
 
 def normalize_timestamp(raw_timestamp: str) -> str:
+    """
+    Convert/Normalize Github timestamps into UTC strings
+    """
     if not raw_timestamp:
         return None
     
